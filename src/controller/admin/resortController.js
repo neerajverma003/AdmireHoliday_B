@@ -1,6 +1,6 @@
 import { body } from "express-validator"
 import Resort from "../../models/resort.model.js"
-
+import mongoose from "mongoose";
 import cloudinary from "../../config/cloudinary.js";
 
 
@@ -272,6 +272,7 @@ export const updateResort = async (req, res) => {
       contact_phone,
       is_featured,
     } = req.body;
+    const removedImageIndexesStr = req.body.removedImageIndexes;
 
     // Find the resort by id
     const resort = await Resort.findOne({ _id: id });
@@ -279,16 +280,39 @@ export const updateResort = async (req, res) => {
       return res.status(404).json({ message: "Resort not found" });
     }
 
-    // Check if title already exists on a different resort
-    const duplicate = await Resort.findOne({ title, _id: { $ne: id } });
-    if (duplicate) {
-      return res.status(400).json({ message: "Title already exists" });
+    // Check if title already exists on a DIFFERENT resort (exclude current resort)
+    if (title !== resort.title) {
+      const duplicate = await Resort.findOne({ title, _id: { $ne: new mongoose.Types.ObjectId(id) } });
+      if (duplicate) {
+        return res.status(400).json({ message: "Title already exists" });
+      }
+    }
+
+    // Handle image removal: remove images by index if specified
+    if (removedImageIndexesStr) {
+      try {
+        const removedIndexes = JSON.parse(removedImageIndexesStr);
+        if (Array.isArray(removedIndexes) && removedIndexes.length > 0) {
+          // Filter out removed images (keep images at indices not in removedIndexes)
+          resort.images = resort.images.filter((_, idx) => !removedIndexes.includes(idx));
+        }
+      } catch (err) {
+        console.warn("Failed to parse removedImageIndexes:", err);
+      }
     }
 
     // Update images if new files uploaded
     if (req.files && req.files.length > 0) {
-      // Assuming you're storing the image URL in 'path' or use 'filename' accordingly
-      resort.images = req.files.map((file) => file.path);
+      // Upload new files to Cloudinary
+      const uploadedImages = [];
+      for (let file of req.files) {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "resort",
+        });
+        uploadedImages.push(result.secure_url);
+      }
+      // Append new images to existing ones
+      resort.images = [...resort.images, ...uploadedImages];
     }
 
     // Update other fields
@@ -331,8 +355,11 @@ export const updateResort = async (req, res) => {
 export const deleteResort = async(req,res)=>{
   try {
     const {id} = req.params;
-    const del = await Resort.findOne({_id:id})
-    return res.status(200).json({message:"Deleted Succesfully"})
+    const del = await Resort.findByIdAndDelete(id);
+    if (!del) {
+      return res.status(404).json({ message: "Resort not found" });
+    }
+    return res.status(200).json({ message: "Deleted Successfully" });
   } catch (error) {
     console.log(error)
     return res.status(500).json({message:"Server Error"})
