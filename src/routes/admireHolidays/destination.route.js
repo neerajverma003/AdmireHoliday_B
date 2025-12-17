@@ -4,6 +4,7 @@ import {
   //
   getSingleItineraryById,
   getExclusiveAndWeekendItinerary,
+  getTopSellingItinerary,
   getTrendingDestination,
   domesticAndInternationForHome,
   getOnlyDomesticDestinationOrInternational,
@@ -21,6 +22,7 @@ destinationRoute.get('/image-gallery/:type', getImageGalleryByType); // Fetch im
 // destinationRoute.get('/itineraries/:place', getItineraryByDestinationId); // Fetch itineraries by place
 destinationRoute.get('/itinerary/:id', getSingleItineraryById); // Fetch single itinerary by ID
 destinationRoute.get('/classified-itinerary', getExclusiveAndWeekendItinerary); // Fetch exclusive and weekend itineraries for home page
+destinationRoute.get('/top-selling-itinerary', getTopSellingItinerary); // Fetch top selling itineraries
 destinationRoute.get('/home/trending-destination', getTrendingDestination); // Fetch trending destinations
 destinationRoute.get('/home/international-packages', getInternationalHolidaysPackages); // Fetch international holiday packages
 destinationRoute.get('/home/DomesticAndInternational', domesticAndInternationForHome); // Fetch domestic and international destinations for home page

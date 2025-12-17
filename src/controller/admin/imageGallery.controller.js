@@ -128,18 +128,22 @@ import { formatCountryName } from '../../utils.js';
 export const postImageGallery = async (req, res) => {
   try {
     const { destination_id } = req.body;
+    console.log("Upload Image Gallery - destination_id:", destination_id);
+    console.log("Upload Image Gallery - files count:", req.files?.length || 0);
 
     if (!destination_id) {
       return res.status(400).json({ msg: 'Destination ID is required', success: false });
     }
 
     const filePaths = req.files?.map((file) => file.path) || [];
+    console.log("Upload Image Gallery - file paths:", filePaths);
 
     const existingGallery = await imageGalleryModel.findOne({ destination_id });
 
     if (existingGallery) {
       existingGallery.image.push(...filePaths);
       await existingGallery.save();
+      console.log("Updated existing gallery with", filePaths.length, "new images");
       return res.status(200).json({
         msg: 'Images uploaded successfully and gallery updated',
         success: true,
@@ -152,6 +156,7 @@ export const postImageGallery = async (req, res) => {
     });
 
     await newImageGallery.save();
+    console.log("Created new gallery with", filePaths.length, "images");
     return res.status(201).json({
       msg: 'Image gallery created and images uploaded successfully',
       success: true,
@@ -168,26 +173,34 @@ export const getImageForPlace = async (req, res) => {
   const { destination_id } = req.params;
   try {
     if (!destination_id) {
-      return res.status(400).json({ msg: 'destination name is rqeuired', success: false });
+      return res.status(400).json({ msg: 'destination_id is required', success: false });
     }
+    
     const imageGalleryData = await imageGalleryModel
       .findOne({
         destination_id,
       })
       .populate('destination_id');
-    // console.log(imageGalleryData);
+    
+    console.log("Fetched image gallery data:", imageGalleryData);
+    
+    // ✅ FIXED: Return empty array instead of 404 if no gallery exists
+    // This allows the frontend to show "No Images" message instead of error
     if (!imageGalleryData) {
-      return res
-        .status(404)
-        .json({ msg: 'The image for the given destination not found', success: false });
+      return res.status(200).json({
+        msg: 'No images found for this destination',
+        success: true,
+        imageGalleryData: { image: [] }, // Return empty image array
+      });
     }
+    
     return res.status(200).json({
-      msg: 'Image for the destination found successfully',
+      msg: 'Images for the destination found successfully',
       success: true,
       imageGalleryData,
     });
   } catch (error) {
-    console.log(`Post payment method Error ${error}`);
+    console.log(`Get Image For Place Error -> ${error}`);
     return res.status(500).json({ msg: 'Server Error', success: false });
   }
 };

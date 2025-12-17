@@ -368,7 +368,8 @@ adminRoute.get('/cancellation-policy', auth, getCancellationPolicy);
 adminRoute.put('/cancellation-policy', auth, updateCancellationPolicy);
 
 // Customer Gallery  Section
-adminRoute.post('/customer-gallery', auth, uploadMedia.array('image'), postCustomerGallery);
+// Allow up to 50 images per upload for customer gallery
+adminRoute.post('/customer-gallery', auth, uploadMedia.array('image', 50), postCustomerGallery);
 adminRoute.get('/customer-gallery', auth, getAllCustomerGalleryImages);
 adminRoute.delete('/customer-gallery/delete', auth, deleteCustomerGalleryImage);
 

@@ -89,6 +89,27 @@ export const getExclusiveAndWeekendItinerary = async (req, res) => {
   }
 };
 
+// Get Top Selling Itineraries
+export const getTopSellingItinerary = async (req, res) => {
+  try {
+    const topSellingItineraries = await itineraryModel
+      .find({ classification: { $in: [/top\s*selling/i] } })
+      .populate('selected_destination')
+      .sort({ createdAt: -1 })
+      .limit(20);
+    
+    if (!topSellingItineraries || topSellingItineraries.length === 0) {
+      return res.status(200).json({ success: true, data: [], message: 'No top selling itineraries found' });
+    }
+    
+    console.log('Top Selling Itineraries fetched:', topSellingItineraries.length);
+    return res.status(200).json({ success: true, data: topSellingItineraries });
+  } catch (error) {
+    console.error('Error in getTopSellingItinerary:', error);
+    return res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
 // Trending Detsination
 export const getTrendingDestination = async (req, res) => {
   try {

@@ -17,6 +17,15 @@ const storage = new CloudinaryStorage({
   },
 });
 
-const uploadMedia = multer({ storage });
+// Increase limits to allow large text fields (data URLs) when frontend posts base64 in fields.
+// `fieldSize` controls the maximum size (in bytes) of non-file form fields parsed by busboy.
+// `fileSize` controls maximum size of uploaded files.
+const uploadMedia = multer({
+  storage,
+  limits: {
+    fieldSize: 50 * 1024 * 1024, // 50 MB per non-file field
+    fileSize: 200 * 1024 * 1024, // 200 MB per file
+  },
+});
 
 export default uploadMedia;

@@ -1,4 +1,5 @@
 import destinatinInternationAndDomestic from '../../models/destinationInternationAndDomestic.model.js';
+import imageGalleryModel from '../../models/imageGallery.model.js';
 import { formatCountryName } from '../../utils.js';
 
 // For sending name of place according to their type "Domestic/International"
@@ -56,6 +57,22 @@ export const addDestination_Domestic_Internationl = async (req, res) => {
     });
 
     await newDestination.save();
+
+    // ✅ SYNC to imageGalleryModel so View Image Gallery can see the images
+    console.log("Syncing new destination images to imageGalleryModel...");
+    try {
+      if (titleImages.length > 0) {
+        const newImageGallery = new imageGalleryModel({
+          destination_id: newDestination._id,
+          image: titleImages,
+        });
+        await newImageGallery.save();
+        console.log("Created image gallery for new destination with", titleImages.length, "images");
+      }
+    } catch (syncError) {
+      console.error("Error syncing to imageGalleryModel:", syncError);
+      // Don't fail the request, just log the sync error
+    }
 
     return res.status(200).json({ msg: 'Destination created successfully', success: true });
   } catch (error) {
@@ -151,6 +168,34 @@ export const updateDestination_Domestic_Internationl = async (req, res) => {
     }
 
     await destination.save();
+
+    // ✅ SYNC to imageGalleryModel so View Image Gallery can see the images
+    console.log("Syncing destination images to imageGalleryModel...");
+    try {
+      let imageGallery = await imageGalleryModel.findOne({ destination_id: id });
+      
+      if (imageGallery) {
+        // Update existing gallery - merge new images with existing ones
+        imageGallery.image = Array.from(
+          new Set([...(imageGallery.image || []), ...(destination.title_image || [])])
+        );
+        await imageGallery.save();
+        console.log("Updated existing image gallery with", imageGallery.image.length, "total images");
+      } else {
+        // Create new gallery record with all title_image images
+        if (destination.title_image && destination.title_image.length > 0) {
+          imageGallery = new imageGalleryModel({
+            destination_id: id,
+            image: destination.title_image,
+          });
+          await imageGallery.save();
+          console.log("Created new image gallery with", imageGallery.image.length, "images");
+        }
+      }
+    } catch (syncError) {
+      console.error("Error syncing to imageGalleryModel:", syncError);
+      // Don't fail the request, just log the sync error
+    }
 
     return res.status(200).json({ msg: 'Destination updated successfully', success: true });
   } catch (error) {
