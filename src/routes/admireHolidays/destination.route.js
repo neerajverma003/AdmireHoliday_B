@@ -12,6 +12,7 @@ import {
   getItineraryByDestinationId,
   getAllTrendingDestination,
   testing,
+  getHoneymoonDestinations,
   // getWeekendTrendingItineraries
 } from '../../controller/destination.controller.js';
 
@@ -24,6 +25,7 @@ destinationRoute.get('/itinerary/:id', getSingleItineraryById); // Fetch single 
 destinationRoute.get('/classified-itinerary', getExclusiveAndWeekendItinerary); // Fetch exclusive and weekend itineraries for home page
 destinationRoute.get('/top-selling-itinerary', getTopSellingItinerary); // Fetch top selling itineraries
 destinationRoute.get('/home/trending-destination', getTrendingDestination); // Fetch trending destinations
+destinationRoute.get('/home/honeymoon-destination', getHoneymoonDestinations); // Fetch honeymoon destinations
 destinationRoute.get('/home/international-packages', getInternationalHolidaysPackages); // Fetch international holiday packages
 destinationRoute.get('/home/DomesticAndInternational', domesticAndInternationForHome); // Fetch domestic and international destinations for home page
 destinationRoute.get(

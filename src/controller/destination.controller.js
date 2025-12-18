@@ -310,3 +310,33 @@ export const testing = async (req, res) => {
     });
   }
 };
+
+// Get Honeymoon Destinations
+export const getHoneymoonDestinations = async (req, res) => {
+  try {
+    const honeymoonDestinations = await DestinationInternationAndDomesticModel.find({
+      destination_type: { $in: [/^honeymoon$/i] },
+    })
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    if (!honeymoonDestinations || honeymoonDestinations.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: 'No honeymoon destinations found'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: honeymoonDestinations
+    });
+  } catch (error) {
+    console.error('Error in getHoneymoonDestinations:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    });
+  }
+};

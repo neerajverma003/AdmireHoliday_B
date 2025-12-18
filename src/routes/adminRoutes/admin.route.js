@@ -244,7 +244,7 @@ import {
   updateCancellationPolicy,
   getCancellationPolicy,
 } from '../../controller/admin/cancellation.admin.controller.js';
-import { testimonialVideo } from '../../controller/admin/testimonialVideo.admin.controller.js';
+import { testimonialVideo, getAllTestimonialVideos, deleteTestimonialVideo } from '../../controller/admin/testimonialVideo.admin.controller.js';
 import {
   createItinerary,
   getAllItinerary,
@@ -375,6 +375,8 @@ adminRoute.delete('/customer-gallery/delete', auth, deleteCustomerGalleryImage);
 
 // Testimonial Section
 adminRoute.post('/testimonial-video', auth, uploadMedia.single('image'), testimonialVideo);
+adminRoute.get('/testimonial-video', auth, getAllTestimonialVideos);
+adminRoute.delete('/testimonial-video/:id', auth, deleteTestimonialVideo);
 
 // Hero Section
 adminRoute.post('/hero-section', auth, uploadMedia.single('image'), heroSection);
