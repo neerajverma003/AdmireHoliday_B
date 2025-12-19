@@ -25,7 +25,8 @@ const app = express();
 
 app.use(cookieParser());
 app.use(cors(corsOptions));
-app.use(express.json());
+// Increase JSON body limit to 50MB to support large text field submissions (e.g., 50,000 char limits × multiple fields)
+app.use(express.json({ limit: '50mb' }));
 
 // Serve static files from "Upload" folder at "/uploads" path
 app.use('/uploads', express.static('Upload'));
