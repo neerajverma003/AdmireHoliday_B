@@ -273,6 +273,9 @@ import {
   getSuggestions,
   deleteSuggestions,
   archiveSuggestions,
+  getConsultationLeads,
+  createConsultationLead,
+  deleteConsultationLead,
 } from '../../controller/admin/leads.admin.controller.js';
 
 import {
@@ -404,6 +407,11 @@ adminRoute.patch('/get-subscribe/archive/:id', auth, archiveSubscribe);
 adminRoute.get('/get-suggestions', auth, getSuggestions);
 adminRoute.delete('/get-suggestions/:id', auth, authorizeAdmin, deleteSuggestions);
 adminRoute.patch('/get-suggestions/archive/:id', auth, archiveSuggestions);
+
+// Consultation Leads Section
+adminRoute.post('/consultation-leads', createConsultationLead);
+adminRoute.get('/consultation-leads', auth, getConsultationLeads);
+adminRoute.delete('/consultation-leads/:id', auth, authorizeAdmin, deleteConsultationLead);
 
 //Blog Section
 adminRoute.post('/blog', auth, uploadMedia.single('coverImage'), postBlog);

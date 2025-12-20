@@ -2,6 +2,7 @@ import PlanYourJourney from '../../models/planYourJuorney.model.js'
 import contactModel  from '../../models/contact.model.js'
 import subscribeModel from '../../models/subscribe.model.js'
 import suggestionComplainModel from '../../models/suggestionComplain.model.js'
+import ConsultationLead from '../../models/consultationLead.model.js'
 
 // Plan Your Journey Controller Functions
 // Get All Plan Your Journey Data
@@ -192,6 +193,67 @@ export const archiveSuggestions=async(req,res)=>{
     }
     catch(error){
         console.log(`Archive Suggestions ${error}`);
+        return res.status(500).json({msg:"Server Error", success:false});
+    }
+}
+
+// Consultation Lead Controller Functions
+// Get All Consultation Leads
+export const getConsultationLeads=async(req,res)=>{
+    try{
+       const Data=await ConsultationLead.find().sort({createdAt:-1});
+       if(!Data){
+        return res.status(409).json({msg:"There is no Data for This", success:false})
+       }
+       return res.status(200).json({msg:"SuccessFully fetched", success:true, Data});
+    }
+    catch(error){
+        console.log(`Get Consultation Leads ${error}`);
+        return res.status(500).json({msg:"Server Error", success:false});
+    }
+}
+
+// Create Consultation Lead
+export const createConsultationLead=async(req,res)=>{
+    try{
+        const {name, phone, email, state, city, itineraryId, itineraryTitle}=req.body;
+        
+        // Validate required fields
+        if(!name || !phone || !email || !state || !city){
+            return res.status(400).json({msg:"All fields are required", success:false});
+        }
+        
+        const consultationLead = new ConsultationLead({
+            name,
+            phone,
+            email,
+            state,
+            city,
+            itineraryId: itineraryId || null,
+            itineraryTitle: itineraryTitle || null
+        });
+        
+        const savedLead = await consultationLead.save();
+        return res.status(201).json({msg:"Consultation Lead created successfully", success:true, data:savedLead});
+    }
+    catch(error){
+        console.log(`Create Consultation Lead ${error}`);
+        return res.status(500).json({msg:"Server Error", success:false});
+    }
+}
+
+// Delete Consultation Lead
+export const deleteConsultationLead=async(req,res)=>{
+    try{
+        const {id}=req.params;
+        const Data=await ConsultationLead.findByIdAndDelete(id);
+        if(!Data){
+            return res.status(409).json({msg:"There is no Data for This", success:false})
+        }
+        return res.status(200).json({msg:"SuccessFully deleted", success:true, Data});
+    }
+    catch(error){
+        console.log(`Delete Consultation Lead ${error}`);
         return res.status(500).json({msg:"Server Error", success:false});
     }
 }
