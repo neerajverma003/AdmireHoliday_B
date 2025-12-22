@@ -345,7 +345,12 @@ adminRoute.patch('/destination/:id/delete-image', deleteDestinationImage);
 adminRoute.post(
   '/itinerary',
   auth,
-  uploadMedia.single('video'), // ⬅️ only expecting one uploaded video
+  // accept video plus optional multiple images/thumbnails so frontend can upload files directly
+  uploadMedia.fields([
+    { name: 'video', maxCount: 1 },
+    { name: 'destination_images', maxCount: 30 },
+    { name: 'destination_thumbnails', maxCount: 30 },
+  ]),
   createItinerary
 );
 adminRoute.get('/itinerary',  getAllItinerary);

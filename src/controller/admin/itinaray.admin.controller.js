@@ -19,8 +19,8 @@ export const createItinerary = async (req, res) => {
       classification,
       days_information,
       destination_detail,
-      destination_images,
-      destination_thumbnails,
+      destination_images_urls,
+      destination_thumbnails_urls,
       duration,
       exclusion,
       hotel_as_per_category,
@@ -35,8 +35,14 @@ export const createItinerary = async (req, res) => {
     const parsedClassification = parseJSON(classification);
     const parsedDaysInformation = parseJSON(days_information);
     const parsedDestinationDetail = parseJSON(destination_detail);
-    const parsedDestinationImages = parseJSON(destination_images);
-    const parsedDestinationThumbnails = parseJSON(destination_thumbnails);
+    // Parse gallery URLs from the separate fields
+    const parsedDestinationImages = parseJSON(destination_images_urls) || [];
+    const parsedDestinationThumbnails = parseJSON(destination_thumbnails_urls) || [];
+
+    // If client uploaded files for destination images/thumbnails via multipart fields,
+    // multer + CloudinaryStorage will have placed them on req.files. Merge their paths.
+    const uploadedDestinationImages = (req.files?.destination_images || []).map((f) => f.path);
+    const uploadedDestinationThumbnails = (req.files?.destination_thumbnails || []).map((f) => f.path);
     const parsedItineraryTheme = parseJSON(itinerary_theme);
     const parsedPricing = parseJSON(pricing);
 
@@ -76,8 +82,15 @@ export const createItinerary = async (req, res) => {
       classification: parsedClassification,
       days_information: parsedDaysInformation,
       destination_detail: parsedDestinationDetail,
-      destination_images: parsedDestinationImages.map((image) => image?.url || image),
-      destination_thumbnails: parsedDestinationThumbnails.map((image) => image?.url || image),
+      // Merge any JSON-provided images with actual uploaded file paths (uploaded files take precedence appended at end)
+      destination_images: [
+        ...((Array.isArray(parsedDestinationImages) ? parsedDestinationImages.map((image) => image?.url || image) : []) ),
+        ...uploadedDestinationImages,
+      ],
+      destination_thumbnails: [
+        ...((Array.isArray(parsedDestinationThumbnails) ? parsedDestinationThumbnails.map((image) => image?.url || image) : []) ),
+        ...uploadedDestinationThumbnails,
+      ],
       destination_video: videoPath,
       duration,
       exclusion,
