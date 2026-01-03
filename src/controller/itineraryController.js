@@ -14,63 +14,107 @@ export const getAllItinerary = async (req, res) => {
 };
 
 
+//=======get exclusive======
+
 
 
 export const getExclusivePackages = async (req, res) => {
   try {
-    // const data = await itinerary.find({ classification: { $in: ['Exclusive'] } }).lean();
     const data = await itinerary
-      .find({ classification: 'Exclusive' })
-      .select('_id title pricing duration destination_detail destination_thumbnails media')
+      .find({
+        classification: { $in: ['Exclusive'] }, // ✅ FIX
+      })
+      .select(
+        '_id title pricing duration destination_detail destination_thumbnails media classification'
+      )
       .lean();
 
     if (!data || data.length === 0) {
-      return res.status(404).json({ message: 'No Exclusive Packages Found' });
+      return res.status(200).json([]); // ✅ DO NOT return 404
     }
 
     return res.status(200).json(data);
   } catch (error) {
-    console.error(error);
+    console.error('Exclusive packages error:', error);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
-// for getweekendTrading
+
+// export const getExclusivePackages = async (req, res) => {
+//   try {
+//     // const data = await itinerary.find({ classification: { $in: ['Exclusive'] } }).lean();
+//     const data = await itinerary
+//       .find({ classification: 'Exclusive' })
+//       .select('_id title pricing duration destination_detail destination_thumbnails media')
+//       .lean();
+
+//     if (!data || data.length === 0) {
+//       return res.status(404).json({ message: 'No Exclusive Packages Found' });
+//     }
+
+//     return res.status(200).json(data);
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// };
+
+
+
+
+
+
+
+// ================== for getweekendTrading
+
+
+
+
+
+// export const getWeekendTrendingPackages = async (req, res) => {
+//   try {
+//     const data = await itinerary
+//       .find({
+//         $and: [
+//           { classification: { $elemMatch: { $regex: /weekend/i } } },
+//           { classification: { $elemMatch: { $regex: /trending/i } } },
+//         ],
+//       })
+//       .select('_id title pricing duration destination_detail destination_thumbnails')
+//       .limit(4)
+//       .lean();
+
+//     res.status(200).json(data);
+//   } catch (error) {
+//     console.error('Weekend API Error:', error);
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// };
 
 
 export const getWeekendTrendingPackages = async (req, res) => {
   try {
     const data = await itinerary
       .find({
-        $and: [
-          { classification: { $elemMatch: { $regex: /weekend/i } } },
-          { classification: { $elemMatch: { $regex: /trending/i } } },
-        ],
+        classification: { $regex: /weekend/i },
       })
-      .select('_id title pricing duration destination_detail destination_thumbnails')
-      .limit(4)
+      .select(
+        '_id title pricing duration destination_detail destination_thumbnails media classification'
+      )
       .lean();
 
-    res.status(200).json(data);
+    // ✅ Always return array (never 404)
+    return res.status(200).json(data || []);
   } catch (error) {
-    console.error('Weekend API Error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error('Weekend Trending API Error:', error);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 
 
-// export const getWeekendTrendingPackages = async (req, res) => {
-//   try {
-//     const data = await itinerary.find({
-//       classification: { $all: ['Weekend', 'Trending'] },
-//     });
 
-//     res.status(200).json(data);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Internal Server Error' });
-//   }
-// };
 
 
 // for weekend gateway
